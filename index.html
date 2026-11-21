@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>迷你巷戰</title>
+  <meta name="description" content="迷你巷戰 Mini Alley Fight：原創第一人稱巷戰小品。">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div id="vignette"></div>
+  <div id="hurt"></div>
+
+  <div id="hud" hidden>
+    <canvas id="radar" width="296" height="296"></canvas>
+    <div id="score">
+      <div class="side us"><b id="s-us">0</b><small>鐵衛</small></div>
+      <div id="timerwrap"><span id="timer">3:00</span><small id="mode-label">先得 10</small></div>
+      <div class="side them"><b id="s-them">0</b><small>夜梟</small></div>
+    </div>
+    <div id="feed"></div>
+    <div id="spotted" hidden>被發現</div>
+    <div id="banner"></div>
+    <div id="crosshair" aria-hidden="true">
+      <i class="h l"></i><i class="h r"></i><i class="v u"></i><i class="v d"></i><i class="dot"></i>
+    </div>
+    <div id="hitmark" aria-hidden="true"><i></i><i></i></div>
+    <div id="dirhit" aria-hidden="true">
+      <i class="f"></i><i class="b"></i><i class="l"></i><i class="r"></i>
+    </div>
+    <div id="reload" hidden>
+      <div class="track"><div id="reloadfill"></div></div>
+      <span>換彈</span>
+    </div>
+    <div id="hpblock">
+      <div id="hpnum">100</div>
+      <div id="hpbar"><div id="hpfill"></div></div>
+      <div class="lbl">生命</div>
+    </div>
+    <div id="invuln" hidden>重整</div>
+    <div id="ammoblock">
+      <div id="wname">赤線-30</div>
+      <div id="wtype">步槍</div>
+      <div><span id="mag">30</span><span id="reserve">90</span></div>
+    </div>
+    <div id="hintlock" hidden>點擊畫面鎖定滑鼠</div>
+    <div id="dead" hidden>
+      <p>陣亡</p>
+      <p id="dead-time">2.5</p>
+    </div>
+  </div>
+
+  <div id="touch" hidden>
+    <div id="lookpad"></div>
+    <div id="stick" aria-label="移動"><div id="knob"></div></div>
+    <div id="tbtns">
+      <button id="t-jump" type="button">跳</button>
+      <button id="t-fire" type="button">開火</button>
+      <button id="t-swap" type="button">換槍</button>
+      <button id="t-reload" type="button">換彈</button>
+    </div>
+  </div>
+
+  <section id="brief" class="overlay">
+    <div class="panel">
+      <div class="brand">
+        <svg class="mark" viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M8 46 L32 16 L56 46" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/>
+          <path d="M18 46 L32 28 L46 46" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>
+        </svg>
+        <div>
+          <h1>迷你巷戰</h1>
+          <p class="sub">MINI ALLEY FIGHT</p>
+        </div>
+      </div>
+      <p class="where">南倉巷 · 團隊死鬥</p>
+      <p class="lead">夜梟四人已摸進倉區。你是鐵衛最後的夜班。先取得 10 個殲敵，或在三分鐘後以分數分勝負。貼着掩體打，站定點射比掃射更準。</p>
+      <div class="factions">
+        <span class="iron">鐵衛 · 你</span>
+        <span class="vs">對</span>
+        <span class="owl">夜梟 · 四人</span>
+      </div>
+      <h2>操作</h2>
+      <table class="controls">
+        <tr><th>滑鼠移動</th><td>環視</td></tr>
+        <tr><th>左鍵</th><td>開火</td></tr>
+        <tr><th>W A S D</th><td>移動</td></tr>
+        <tr><th>Shift</th><td>慢行，腳步更輕，彈道更穩</td></tr>
+        <tr><th>空白鍵</th><td>跳躍</td></tr>
+        <tr><th>R</th><td>換彈</td></tr>
+        <tr><th>1 / 2</th><td>赤線-30／灰釘</td></tr>
+        <tr><th>Esc</th><td>暫停</td></tr>
+      </table>
+      <h2>武器</h2>
+      <table class="guns">
+        <tr><td>赤線-30</td><td>步槍 · 30 發 · 連射</td></tr>
+        <tr><td>灰釘</td><td>手槍 · 12 發 · 單發，近身更狠</td></tr>
+      </table>
+      <p class="note">巷內三個補給箱可補 45 點生命，取走後會再出現。爆頭傷害加倍。</p>
+      <p id="filewarn" hidden>這個頁面要用本機靜態伺服器打開。直接雙擊檔案時，瀏覽器會封鎖模組。</p>
+      <div class="sliders">
+        <label>靈敏度 <input id="sens" type="range" min="80" max="450" value="215"></label>
+        <label>音量 <input id="vol" type="range" min="0" max="100" value="80"></label>
+      </div>
+      <button id="btn-start" class="btn" type="button">開始作戰</button>
+      <p class="fine">原創巷戰小品。名稱、地圖、武器、聲響與標識都是獨立創作，與任何商業遊戲無關。</p>
+    </div>
+  </section>
+
+  <section id="pause" class="overlay" hidden>
+    <div class="panel narrow">
+      <h1>已暫停</h1>
+      <p class="where">按 Esc 或繼續，回到巷裏</p>
+      <div class="sliders">
+        <label>靈敏度 <input id="sens2" type="range" min="80" max="450" value="215"></label>
+        <label>音量 <input id="vol2" type="range" min="0" max="100" value="80"></label>
+      </div>
+      <button id="btn-resume" class="btn" type="button">繼續</button>
+      <button id="btn-restart" class="btn ghost" type="button">重新開始</button>
+      <button id="btn-help" class="btn ghost" type="button">返回簡報</button>
+    </div>
+  </section>
+
+  <section id="result" class="overlay" hidden>
+    <div class="panel narrow">
+      <h2 id="result-kicker">本局結束</h2>
+      <h1 id="result-title">鐵衛守住南倉</h1>
+      <div id="result-score"><span class="us">0</span> — <span class="them">0</span></div>
+      <table class="stats">
+        <tr><th>殲敵</th><td id="result-k">0</td></tr>
+        <tr><th>陣亡</th><td id="result-d">0</td></tr>
+        <tr><th>戰損比</th><td id="result-kd">0</td></tr>
+        <tr><th>命中率</th><td id="result-acc">0%</td></tr>
+        <tr><th>爆頭</th><td id="result-hs">0</td></tr>
+        <tr><th>用時</th><td id="result-time">0:00</td></tr>
+      </table>
+      <button id="btn-again" class="btn" type="button">再戰一場</button>
+      <button id="btn-back" class="btn ghost" type="button">返回簡報</button>
+    </div>
+  </section>
+
+  <script type="module" src="js/game.js"></script>
+</body>
+</html>
